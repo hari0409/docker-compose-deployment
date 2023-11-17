@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./lms_full_backend
+      dockerfile: Dockerfile.backend
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017/lms-backend
+    ports:
+      - "21000:21000"
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/src
+    networks:
+      - node-network
+
+  mongodb:
+    image: mongo:6-jammy
+    ports:
+      - "27017:27017"
+    volumes:
+      - dbdata6:/data/db
+    networks:
+      - node-network
+
+  frontend:
+    build:
+      context: ./lms_full_frontend
+      dockerfile: Dockerfile.frontend
+    restart: always
+    ports:
+      - "3000:3000"
+
+    environment:
+      - REACT_APP_BACKEND_URL=https://178.16.138.67
+    networks:
+      - node-network
+    depends_on:
+      - backend
+  proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    image: nginx_proxy:v1
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - frontend
+      - backend
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+volumes:
+  dbdata6: {}
+
+networks:
+  node-network:
+    driver: bridge
