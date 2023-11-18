@@ -20,3 +20,5 @@
         * Must be the domain-name of the organisation or any sub-domain if in other server 
         * port number can come only in nginx
         * The port mapping must be 80:80 or 443:443 for accessing only.
+
+Link for Swarm: https://www.couchbase.com/blog/deploy-docker-compose-services-swarm/
